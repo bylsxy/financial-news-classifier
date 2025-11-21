@@ -12,9 +12,9 @@ financial-news-classifier/
 
 ## 技术栈
 
-- 后端: Python, FastAPI, FinBERT (ProsusAI/finbert)
-- 前端: React, Vite
-- 模型: FinBERT
+- 后端: Python 3.12, FastAPI 0.104, FinBERT (ProsusAI/finbert), PyTorch 2.4
+- 前端: React 19, TypeScript 5, Vite 7, Tailwind CSS 4, Framer Motion, Recharts
+- 模型: FinBERT (标准化财经分类)
 
 ## 标准化财经分类体系 (v2)
 
@@ -84,9 +84,60 @@ curl -X POST "http://localhost:8000/api/classify?temperature=1.2&top_k=5" \
 
 详见 `docs/migration_v2.md`，包含从情感分类到结构化财经分类的动机与不兼容变更。
 
-## 启动命令
+## 快速启动
 
-后端：
-uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000
-前端：
+### 后端 (Python)
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+访问 <http://localhost:8000/docs> 查看 API 文档
+
+### 前端 (Node.js)
+
+```bash
+cd frontend
+npm install
 npm run dev
+```
+
+访问 <http://localhost:5173> 使用 Web 界面
+
+详细说明见 `QUICKSTART.md`
+
+## 核心功能
+
+### 🎯 标准化分类输出
+
+- **市场方向**: 利好/利空/中性
+- **事件类型**: 6 大固定类别 (宏观政策、行业趋势、企业行动等)
+- **影响强度**: 高/中/低
+- **风险信号**: 违约、监管、流动性、运营风险或无风险
+
+### 📊 可视化界面
+
+- 现代化 UI 设计 (渐变背景、圆角卡片、流畅动画)
+- Top-K 事件类型置信度柱状图
+- 响应式布局 (Desktop/Tablet/Mobile)
+- Temperature 与 Top-K 参数实时调节
+
+### 🧪 测试覆盖
+
+- 后端单元测试 (pytest)
+- 前端 E2E 测试 (Playwright)
+- 自动化截图对比
+
+## 版本信息
+
+**v2.0.0** - 标准化财经分类体系
+
+- ✅ 从情感分类迁移到结构化多维分类
+- ✅ 温度缩放校准概率分布
+- ✅ Top-K 置信度输出
+- ✅ 前端现代化重构
+- ✅ 完整 E2E 测试覆盖
+
+---

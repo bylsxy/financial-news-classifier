@@ -1,16 +1,120 @@
-# React + Vite
+# Financial News Classifier - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+现代化财经新闻分类系统前端 - 基于 React + TypeScript + Vite
 
-Currently, two official plugins are available:
+## ✨ 特性
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎨 **现代化 UI**：Tailwind CSS + 渐变背景 + 圆角设计
+- 🎭 **流畅动画**：Framer Motion 驱动的页面过渡和组件动画
+- 📊 **数据可视化**：Recharts 实现的 Top-K 事件类型置信度柱状图
+- 📱 **完全响应式**：支持 Desktop / Tablet / Mobile 全设备
+- 🔧 **可配置参数**：温度缩放 (Temperature) 和 Top-K 数量实时调节
+- 🧪 **E2E 测试**：Playwright 自动化 UI 测试 + 截图对比
 
-## React Compiler
+## 🛠️ 技术栈
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **框架**: React 19 + TypeScript
+- **构建工具**: Vite 7
+- **样式**: Tailwind CSS 4
+- **动画**: Framer Motion
+- **图表**: Recharts
+- **图标**: Radix UI Icons
+- **测试**: Playwright
 
-## Expanding the ESLint configuration
+## 📦 安装依赖
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+```
+
+## 🚀 开发运行
+
+```bash
+npm run dev
+```
+
+访问 <http://localhost:5173>
+
+## 🏗️ 生产构建
+
+```bash
+npm run build
+npm run preview
+```
+
+## 🧪 运行测试
+
+```bash
+# 运行所有测试
+npm run test
+
+# 交互式 UI 模式
+npm run test:ui
+
+# 安装浏览器（首次运行）
+npx playwright install
+```
+
+## 📡 API 对接
+
+后端地址通过 Vite 代理：`/api` → `http://localhost:8000`
+
+### 请求示例
+
+```typescript
+POST /api/classify?temperature=1.2&top_k=5
+{
+  "text": "Apple Inc. reported strong quarterly earnings..."
+}
+```
+
+### 响应格式
+
+```json
+{
+  "input": "...",
+  "result": {
+    "market_direction": "bullish",
+    "event_type": "financial_report",
+    "impact_strength": "high",
+    "risk_signal": "none"
+  },
+  "top_k": [
+    { "label": "financial_report", "score": 0.45 }
+  ]
+}
+```
+
+## 📂 项目结构
+
+```text
+src/
+├── api/              # API 调用
+├── components/       # React 组件
+├── lib/              # 工具函数
+├── types/            # TypeScript 类型
+└── App.tsx           # 主应用
+```
+
+## 🎨 核心组件
+
+### NewsInput
+
+文本输入 + Temperature/Top-K 滑块控制
+
+### PredictionCard
+
+渐变卡片展示分类结果 + Badge 标签
+
+### TopKChart
+
+Recharts 水平柱状图 + 动画效果
+
+## 📸 测试截图
+
+运行测试后查看 `tests/screenshots/`
+
+---
+
+**v2.0.0** · Powered by React + TypeScript + Vite
+
