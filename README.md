@@ -127,7 +127,6 @@ npm run dev
 ### 🧪 测试覆盖
 
 - 后端单元测试 (pytest)
-- 前端 E2E 测试 (Playwright)
 - 自动化截图对比
 
 ## 版本信息

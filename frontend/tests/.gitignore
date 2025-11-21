@@ -1,9 +1,0 @@
-# Playwright 测试相关
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/tests/screenshots/*.png
-
-# 环境变量
-.env.local

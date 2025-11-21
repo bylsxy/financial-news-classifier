@@ -9,7 +9,6 @@
 - 📊 **数据可视化**：Recharts 实现的 Top-K 事件类型置信度柱状图
 - 📱 **完全响应式**：支持 Desktop / Tablet / Mobile 全设备
 - 🔧 **可配置参数**：温度缩放 (Temperature) 和 Top-K 数量实时调节
-- 🧪 **E2E 测试**：Playwright 自动化 UI 测试 + 截图对比
 
 ## 🛠️ 技术栈
 
@@ -19,7 +18,6 @@
 - **动画**: Framer Motion
 - **图表**: Recharts
 - **图标**: Radix UI Icons
-- **测试**: Playwright
 
 ## 📦 安装依赖
 
