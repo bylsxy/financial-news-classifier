@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ReloadIcon, UploadIcon, PlayIcon, TrashIcon, EyeOpenIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { ReloadIcon, UploadIcon, PlayIcon, TrashIcon, EyeOpenIcon, Cross2Icon, FileTextIcon, ExternalLinkIcon } from '@radix-ui/react-icons';
 
 interface Dataset {
   filename: string;
@@ -16,6 +16,8 @@ interface TrainingStatus {
   message: string;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
 export const TrainingPage: React.FC = () => {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [status, setStatus] = useState<TrainingStatus | null>(null);
@@ -26,10 +28,19 @@ export const TrainingPage: React.FC = () => {
 
   const fetchDatasets = async () => {
     try {
-      const res = await fetch('/api/datasets');
-      if (res.ok) {
+      const res = await fetch(`${API_BASE_URL}/api/datasets`);
+      const contentType = res.headers.get("content-type");
+      if (res.ok && contentType && contentType.includes("application/json")) {
         const data = await res.json();
+        console.log("Fetched datasets:", data); // Debug log
         setDatasets(data);
+      } else {
+        console.error("Failed to fetch datasets:", res.status, res.statusText);
+        if (contentType && !contentType.includes("application/json")) {
+             console.error("Expected JSON but got:", contentType);
+             const text = await res.text();
+             console.error("Response body preview:", text.substring(0, 100));
+        }
       }
     } catch (e) {
       console.error("Failed to fetch datasets", e);
@@ -38,8 +49,9 @@ export const TrainingPage: React.FC = () => {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch('/api/train/status');
-      if (res.ok) {
+      const res = await fetch(`${API_BASE_URL}/api/train/status`);
+      const contentType = res.headers.get("content-type");
+      if (res.ok && contentType && contentType.includes("application/json")) {
         const data = await res.json();
         setStatus(data);
       }
@@ -63,7 +75,7 @@ export const TrainingPage: React.FC = () => {
 
     setUploading(true);
     try {
-      const res = await fetch('/api/upload_dataset', {
+      const res = await fetch(`${API_BASE_URL}/api/upload_dataset`, {
         method: 'POST',
         body: formData,
       });
@@ -78,7 +90,7 @@ export const TrainingPage: React.FC = () => {
   const handleTrain = async () => {
     if (!selectedDataset) return;
     try {
-      await fetch(`/api/train?dataset_name=${selectedDataset}`, {
+      await fetch(`${API_BASE_URL}/api/train?dataset_name=${selectedDataset}`, {
         method: 'POST'
       });
       fetchStatus();
@@ -92,7 +104,7 @@ export const TrainingPage: React.FC = () => {
     if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
     
     try {
-      const res = await fetch(`/api/datasets/${encodeURIComponent(filename)}`, {
+      const res = await fetch(`${API_BASE_URL}/api/datasets/${encodeURIComponent(filename)}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -111,7 +123,7 @@ export const TrainingPage: React.FC = () => {
   const handlePreview = async (e: React.MouseEvent, filename: string) => {
     e.stopPropagation();
     try {
-      const res = await fetch(`/api/datasets/${encodeURIComponent(filename)}/preview`);
+      const res = await fetch(`${API_BASE_URL}/api/datasets/${encodeURIComponent(filename)}/preview`);
       if (res.ok) {
         const data = await res.json();
         setPreviewData(data);
@@ -122,7 +134,15 @@ export const TrainingPage: React.FC = () => {
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to preview dataset (Network Error)");
+      alert(`Failed to preview dataset (Network Error): ${e instanceof Error ? e.message : String(e)}`);
+    }
+  };
+
+  const handleOpenFolder = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/api/datasets/open_folder`, { method: 'POST' });
+    } catch (e) {
+      console.error("Failed to open folder", e);
     }
   };
 
@@ -145,10 +165,17 @@ export const TrainingPage: React.FC = () => {
           <div className="glass-panel p-8 rounded-3xl space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold text-slate-700 flex items-center gap-2">
-                <UploadIcon className="w-5 h-5" />
+                <FileTextIcon className="w-5 h-5" />
                 Datasets
               </h2>
               <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleOpenFolder}
+                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                  title="Open Folder"
+                >
+                  <ExternalLinkIcon />
+                </button>
                 <button 
                   onClick={fetchDatasets}
                   className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"

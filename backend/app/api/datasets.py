@@ -7,15 +7,31 @@ import shutil
 from typing import List
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
+from pathlib import Path
 
 router = APIRouter()
 
-DATASET_DIR = "app/data/datasets"
+# Use absolute path relative to this file to ensure consistency regardless of CWD
+BASE_DIR = Path(__file__).resolve().parent.parent # app/
+DATASET_DIR = BASE_DIR / "data" / "datasets"
 os.makedirs(DATASET_DIR, exist_ok=True)
 
 class DatasetInfo(BaseModel):
     filename: str
     size: int
+
+@router.post("/datasets/open_folder")
+async def open_dataset_folder():
+    """打开数据集文件夹"""
+    try:
+        if os.name == 'nt':  # Windows
+            os.startfile(DATASET_DIR)
+        else:
+            # For other OS, we might need different commands, but user is on Windows
+            pass
+        return {"message": "Folder opened"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to open folder: {e}")
 
 @router.post("/upload_dataset")
 async def upload_dataset(file: UploadFile = File(...)):
@@ -54,14 +70,17 @@ async def list_datasets():
 
 @router.get("/datasets/{filename}/preview")
 async def preview_dataset(filename: str):
-    """预览数据集前5行"""
+    """预览数据集前20行"""
     file_path = os.path.join(DATASET_DIR, filename)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Dataset not found")
     
     try:
         import pandas as pd
-        df = pd.read_csv(file_path, nrows=5)
+        # Increase preview limit to 20 rows
+        df = pd.read_csv(file_path, nrows=20)
+        # Replace NaN with empty string to ensure JSON serializability
+        df = df.fillna("")
         return df.to_dict(orient="records")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read dataset: {e}")

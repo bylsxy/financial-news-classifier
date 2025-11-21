@@ -5,6 +5,7 @@ export interface NewsItem {
   source: string;
   crawled_at: string;
   label: string;
+  image_url?: string;
 }
 
 export async function crawlNews(source: string = 'yahoo'): Promise<NewsItem[]> {

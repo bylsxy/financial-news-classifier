@@ -124,12 +124,19 @@ export const CrawlerPage: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                     key={i}
-                    className="p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all"
+                    className="p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex gap-4"
                   >
-                    <p className="text-slate-800 font-medium mb-2">{item.text}</p>
-                    <div className="flex justify-between items-center text-xs text-slate-400">
-                      <span className="bg-slate-100 px-2 py-1 rounded">{item.source}</span>
-                      <span className="font-mono">{new Date(item.crawled_at).toLocaleString()}</span>
+                    {item.image_url && (
+                      <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
+                        <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-slate-800 font-medium mb-2 line-clamp-3">{item.text}</p>
+                      <div className="flex justify-between items-center text-xs text-slate-400">
+                        <span className="bg-slate-100 px-2 py-1 rounded">{item.source}</span>
+                        <span className="font-mono">{new Date(item.crawled_at).toLocaleString()}</span>
+                      </div>
                     </div>
                   </motion.div>
                 ))
