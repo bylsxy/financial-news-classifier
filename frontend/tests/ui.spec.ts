@@ -62,7 +62,8 @@ test.describe('Financial News Classifier UI', () => {
 
   test('should display prediction results when API returns data', async ({ page }) => {
     // Mock API 响应
-    await page.route('*/**/api/classify*', async (route) => {
+    await page.route('**/api/classify*', async (route) => {
+      console.log('Mocking API request');
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -86,9 +87,10 @@ test.describe('Financial News Classifier UI', () => {
     });
 
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
     
     // 确保页面加载完成
-    await expect(page.getByRole('heading', { name: /Financial News Classifier/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Financial News Classifier/i })).toBeVisible({ timeout: 10000 });
 
     // 输入文本
     await page.getByLabel('财经新闻文本').fill(
@@ -113,7 +115,7 @@ test.describe('Financial News Classifier UI', () => {
 
   test('should display prediction results on mobile', async ({ page }) => {
     // Mock API
-    await page.route('*/**/api/classify*', async (route) => {
+    await page.route('**/api/classify*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -135,9 +137,10 @@ test.describe('Financial News Classifier UI', () => {
     });
 
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
     
     // 确保页面加载完成
-    await expect(page.getByRole('heading', { name: /Financial News Classifier/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Financial News Classifier/i })).toBeVisible({ timeout: 10000 });
 
     await page.getByLabel('财经新闻文本').fill('Apple Inc. reported strong quarterly earnings.');
     await page.getByRole('button', { name: /开始分类/i }).click();
