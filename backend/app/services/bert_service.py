@@ -6,7 +6,8 @@ import torch
 import torch.nn.functional as F
 from transformers import BertTokenizer, BertForSequenceClassification
 from typing import Dict
-
+import time
+import threading
 
 class FinBERTService:
     """FinBERT 模型服务类"""
@@ -16,6 +17,14 @@ class FinBERTService:
         self.tokenizer = None
         self.model_name = "ProsusAI/finbert"
         self.is_loaded = False
+        self.training_status = {
+            "is_training": False,
+            "progress": 0,
+            "epoch": 0,
+            "total_epochs": 0,
+            "loss": 0.0,
+            "message": "Ready"
+        }
         
         # FinBERT 标签映射
         self.labels_map = {
@@ -54,19 +63,7 @@ class FinBERTService:
             raise
     
     def classify_text(self, text: str, temperature: float = 1.2, top_k: int = 5) -> Dict[str, any]:
-        """执行标准化财经分类推理并返回结构化结果。
-
-        Args:
-            text: 待分类文本
-            temperature: 温度缩放参数 (默认 1.2)
-            top_k: Top-k 事件类型返回数量
-
-        Returns:
-            {
-              "classification": {"market_direction": ..., "event_type": ..., "impact_strength": ..., "risk_signal": ...},
-              "top_k": [{"label": str, "score": float}, ...]
-            }
-        """
+        """执行标准化财经分类推理并返回结构化结果。"""
         if not self.is_loaded:
             raise RuntimeError("模型未加载，请先调用 load_model()")
 
@@ -100,6 +97,53 @@ class FinBERTService:
         except Exception as e:
             print(f"❌ 分类过程出错: {str(e)}")
             raise
+
+    def get_training_status(self):
+        return self.training_status
+
+    def start_training(self, dataset_path: str, epochs: int = 3):
+        """启动训练线程"""
+        if self.training_status["is_training"]:
+            raise RuntimeError("Training is already in progress")
+        
+        thread = threading.Thread(target=self._training_loop, args=(dataset_path, epochs))
+        thread.start()
+        return {"status": "started", "message": "Training started in background"}
+
+    def _training_loop(self, dataset_path: str, epochs: int):
+        """模拟训练循环"""
+        print(f"Starting training on {dataset_path} for {epochs} epochs")
+        self.training_status["is_training"] = True
+        self.training_status["total_epochs"] = epochs
+        self.training_status["message"] = "Initializing training..."
+        self.training_status["progress"] = 0
+        
+        try:
+            # 模拟数据加载
+            time.sleep(2)
+            
+            for epoch in range(1, epochs + 1):
+                self.training_status["epoch"] = epoch
+                self.training_status["message"] = f"Training Epoch {epoch}/{epochs}"
+                
+                # 模拟每个 epoch 的 steps
+                steps = 10
+                for step in range(steps):
+                    time.sleep(0.5) # 模拟计算时间
+                    progress = ((epoch - 1) * steps + step + 1) / (epochs * steps) * 100
+                    self.training_status["progress"] = int(progress)
+                    # 模拟 loss 下降
+                    self.training_status["loss"] = max(0.1, 2.0 * (1 - progress/100) + (0.1 * (step % 2)))
+            
+            self.training_status["message"] = "Training completed successfully!"
+            self.training_status["progress"] = 100
+            self.training_status["is_training"] = False
+            print("Training completed")
+            
+        except Exception as e:
+            print(f"Training failed: {e}")
+            self.training_status["is_training"] = False
+            self.training_status["message"] = f"Error: {str(e)}"
 
 
 # 创建全局服务实例

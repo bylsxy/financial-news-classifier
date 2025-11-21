@@ -5,7 +5,7 @@ FastAPI 主应用入口
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import classify, records, datasets
+from app.api import classify, records, datasets, crawler
 from app.services.bert_service import bert_service
 
 # 创建 FastAPI 应用实例
@@ -36,6 +36,7 @@ async def add_charset_utf8(request, call_next):
 app.include_router(classify.router, prefix="/api", tags=["classify"])
 app.include_router(records.router, prefix="/api", tags=["records"])
 app.include_router(datasets.router, prefix="/api", tags=["datasets"])
+app.include_router(crawler.router, prefix="/api", tags=["crawler"])
 
 
 

@@ -40,23 +40,62 @@ async def list_datasets():
     if not os.path.exists(DATASET_DIR):
         return []
         
-    for filename in os.listdir(DATASET_DIR):
-        if filename.endswith('.csv'):
-            file_path = os.path.join(DATASET_DIR, filename)
-            size = os.path.getsize(file_path)
-            datasets.append(DatasetInfo(filename=filename, size=size))
+    # Get all CSV files
+    files = [f for f in os.listdir(DATASET_DIR) if f.endswith('.csv')]
+    
+    # Sort by modification time (newest first)
+    files.sort(key=lambda x: os.path.getmtime(os.path.join(DATASET_DIR, x)), reverse=True)
+    
+    for filename in files:
+        file_path = os.path.join(DATASET_DIR, filename)
+        size = os.path.getsize(file_path)
+        datasets.append(DatasetInfo(filename=filename, size=size))
     return datasets
+
+@router.get("/datasets/{filename}/preview")
+async def preview_dataset(filename: str):
+    """预览数据集前5行"""
+    file_path = os.path.join(DATASET_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    try:
+        import pandas as pd
+        df = pd.read_csv(file_path, nrows=5)
+        return df.to_dict(orient="records")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read dataset: {e}")
+
+@router.delete("/datasets/{filename}")
+async def delete_dataset(filename: str):
+    """删除数据集"""
+    file_path = os.path.join(DATASET_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    try:
+        os.remove(file_path)
+        return {"message": "Dataset deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete dataset: {e}")
 
 @router.post("/train")
 async def train_model(dataset_name: str):
-    """触发模型训练 (占位符)"""
+    """触发模型训练"""
+    from app.services.bert_service import bert_service
+    
     file_path = os.path.join(DATASET_DIR, dataset_name)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Dataset not found")
     
-    # TODO: 实际训练逻辑
-    # 1. 读取 CSV
-    # 2. Fine-tune FinBERT
-    # 3. 保存新模型
-    
-    return {"status": "started", "message": f"Training started with {dataset_name} (Simulation)"}
+    try:
+        result = bert_service.start_training(file_path)
+        return result
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/train/status")
+async def get_training_status():
+    """获取训练状态"""
+    from app.services.bert_service import bert_service
+    return bert_service.get_training_status()

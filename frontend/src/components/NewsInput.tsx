@@ -6,10 +6,11 @@ import { classifyNews } from '../api/classify';
 interface NewsInputProps {
   onResult: (result: PredictionsResp) => void;
   onError: (error: string) => void;
+  value: string;
+  onChange: (text: string) => void;
 }
 
-export const NewsInput: React.FC<NewsInputProps> = ({ onResult, onError }) => {
-  const [text, setText] = useState('');
+export const NewsInput: React.FC<NewsInputProps> = ({ onResult, onError, value, onChange }) => {
   const [temperature, setTemperature] = useState(1.2);
   const [topK, setTopK] = useState(5);
   const [loading, setLoading] = useState(false);
@@ -17,14 +18,14 @@ export const NewsInput: React.FC<NewsInputProps> = ({ onResult, onError }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!text.trim()) {
+    if (!value.trim()) {
       onError('请输入新闻文本');
       return;
     }
 
     setLoading(true);
     try {
-      const result = await classifyNews(text, temperature, topK);
+      const result = await classifyNews(value, temperature, topK);
       onResult(result);
     } catch (error) {
       onError(error instanceof Error ? error.message : '分类失败，请重试');
@@ -35,35 +36,40 @@ export const NewsInput: React.FC<NewsInputProps> = ({ onResult, onError }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6, delay: 0.2 }}
       className="w-full max-w-4xl mx-auto"
     >
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-6 md:p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="glass-panel rounded-3xl p-8 md:p-10 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400" />
+        
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* 文本输入区 */}
-          <div>
-            <label htmlFor="news-text" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="relative">
+            <label htmlFor="news-text" className="block text-lg font-semibold text-slate-700 mb-3">
               财经新闻文本
             </label>
             <textarea
               id="news-text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="输入财经新闻内容进行分类分析..."
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="在此输入财经新闻内容，AI 将为您进行深度分析..."
               rows={6}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
+              className="w-full px-6 py-4 bg-white/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-400 transition-all duration-300 resize-none text-slate-700 placeholder:text-slate-400 text-lg shadow-inner"
               disabled={loading}
             />
           </div>
 
           {/* 参数控制 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
             <div>
-              <label htmlFor="temperature" className="block text-sm font-medium text-gray-700 mb-2">
-                Temperature: {temperature.toFixed(1)}
-              </label>
+              <div className="flex justify-between items-center mb-3">
+                <label htmlFor="temperature" className="text-sm font-semibold text-slate-600">
+                  Temperature (平滑度)
+                </label>
+                <span className="text-sm font-mono text-purple-600 bg-purple-100 px-2 py-1 rounded-md">{temperature.toFixed(1)}</span>
+              </div>
               <input
                 id="temperature"
                 type="range"
@@ -72,16 +78,18 @@ export const NewsInput: React.FC<NewsInputProps> = ({ onResult, onError }) => {
                 step="0.1"
                 value={temperature}
                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-600 transition-colors"
                 disabled={loading}
               />
-              <p className="text-xs text-gray-500 mt-1">控制预测分布的平滑度</p>
             </div>
 
             <div>
-              <label htmlFor="topk" className="block text-sm font-medium text-gray-700 mb-2">
-                Top-K: {topK}
-              </label>
+              <div className="flex justify-between items-center mb-3">
+                <label htmlFor="topk" className="text-sm font-semibold text-slate-600">
+                  Top-K (展示数量)
+                </label>
+                <span className="text-sm font-mono text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md">{topK}</span>
+              </div>
               <input
                 id="topk"
                 type="range"
@@ -90,31 +98,30 @@ export const NewsInput: React.FC<NewsInputProps> = ({ onResult, onError }) => {
                 step="1"
                 value={topK}
                 onChange={(e) => setTopK(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-600 transition-colors"
                 disabled={loading}
               />
-              <p className="text-xs text-gray-500 mt-1">返回事件类型的数量</p>
             </div>
           </div>
 
           {/* 提交按钮 */}
           <motion.button
             type="submit"
-            disabled={loading || !text.trim()}
-            whileHover={{ scale: 1.02 }}
+            disabled={loading || !value.trim()}
+            whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
             whileTap={{ scale: 0.98 }}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-full bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-lg tracking-wide"
           >
             {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <span className="flex items-center justify-center gap-3">
+                <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                分析中...
+                正在深度分析...
               </span>
             ) : (
-              '开始分类'
+              '开始智能分析'
             )}
           </motion.button>
         </form>

@@ -1,2 +1,9 @@
 transformers==4.38.2
 tokenizers==0.15.2
+fastapi
+uvicorn
+torch
+requests
+beautifulsoup4
+python-multipart
+pandas
