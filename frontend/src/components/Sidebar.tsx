@@ -62,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelectExample, history }) =>
               />
             </div>
             <div className="text-xs text-slate-500 font-medium">
-              <p>Developed by yinuodehaohuoban</p>
+              <p>Developed by group1</p>
               <p className="text-[10px] text-slate-400">South China Agricultural University</p>
             </div>
           </div>
